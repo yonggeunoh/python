@@ -89,19 +89,18 @@ def exit(message):
 
 
 if __name__ == '__main__':
-    # try:
-    #     browser = sys.argv[1].lower()
-    # except IndexError:
-    #     exit('사용법> {} 브라우저<ie/chrome>'.format(sys.argv[0]))
-    #
-    # id = input('TVO 아이디 : ')
-    # if not id:
-    #     exit('아이디를 입력해주세요.')
-    #
-    # password = getpass('TVO 비밀번호 : ')
-    # if not password:
-    #     exit('암호를 입력해주세요.')
+    try:
+        browser = sys.argv[1].lower()
+    except IndexError:
+        exit('사용법> {} 브라우저<ie/chrome>'.format(sys.argv[0]))
 
-    # main(id, password, browser)
-    main("sergei5", "ml31592517", "chrome")
+    id = input('TVO 아이디 : ')
+    if not id:
+        exit('아이디를 입력해주세요.')
+
+    password = getpass('TVO 비밀번호 : ')
+    if not password:
+        exit('암호를 입력해주세요.')
+
+    main(id, password, browser)
 
