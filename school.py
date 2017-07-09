@@ -16,7 +16,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 
 
 def getParentPaid(args):
-    logging.basicConfig(filename='.\\school.log',  encoding = "UTF-8",  level=logging.DEBUG)
+    logging.basicConfig(filename='.\\school.log',  encoding = "utf-8",  level=logging.DEBUG)
 
     # logger 인스턴스를 생성 및 로그 레벨 설정
     logger = logging.getLogger("crumbs")
