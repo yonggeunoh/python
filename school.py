@@ -4,7 +4,7 @@ Created on Thu Jul  6 13:40:56 2017
 @author: 1310615
 """
 
-import argparse, textwrap
+import argparse
 import pandas as pd
 from pandas import DataFrame
 from selenium import webdriver
@@ -34,9 +34,6 @@ from selenium.common.exceptions import StaleElementReferenceException
 
 def getParentPaid(args):
 
-    grade = {'E':'ElementarySchool' ,'M':'MiddleSchool'    , 'H':'HighSchool'
-            ,'U':'University'       ,'G':'GraduateSchool'
-            ,'K':'Kindergarden'     ,'S':'SpecialSchool'   ,'O':'Others' }
     schoolDf = None
     acctPblcDf = None
     acctPrvtDf = None
@@ -44,6 +41,12 @@ def getParentPaid(args):
     pathFile = '.\\file\\'
     pathWebDriver = '.\\webdriver\\'
     debugLog = 'ParentPaid Start !!'
+    
+    
+    grade = {'e':'ElementarySchool' ,'m':'MiddleSchool'    , 'h':'HighSchool'
+            ,'u':'University'       ,'g':'GraduateSchool'
+            ,'k':'Kindergarden'     ,'s':'SpecialSchool'   ,'o':'Others' }
+    
 
     # 국공립학교 계정
     acctPblcDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입','등록금'
@@ -74,32 +77,32 @@ def getParentPaid(args):
     for g in grade:
 #    for g in ('E','M','H'):
         debugLog = '학교정보 읽어오기'
-        if g == 'E':
+        if g == 'e':
             schoolDf = pd.read_excel(pathFile  + "2-2) 초등학교 현황.xlsx")
             schoolDf.columns = schoolDf.iloc[2,0:]
             schoolDf = schoolDf.drop([0,1,2],axis=0)
-        elif g == 'M':
+        elif g == 'm':
             schoolDf = pd.read_excel(pathFile  + "2-3) 중학교 현황.xlsx")
             schoolDf.columns = schoolDf.iloc[2,0:]
             schoolDf = schoolDf.drop([0,1,2],axis=0)
-        elif g == 'H':
+        elif g == 'h':
             schoolDf = pd.read_excel(pathFile  + "2-4) 고등학교 현황.xlsx")
             schoolDf.columns = schoolDf.iloc[2,0:]
             schoolDf = schoolDf.drop([0,1,2],axis=0)
-        elif g == 'S':
+        elif g == 's':
             schoolDf = pd.read_excel(pathFile  + "2-5) 특수학교 및 기타학교 현황.xlsx", sheetname ="특수학교")
             schoolDf.columns = schoolDf.iloc[2,0:]
             schoolDf = schoolDf.drop([0,1,2],axis=0)
-        elif g == 'O':
+        elif g == 'o':
             schoolDf = pd.read_excel(pathFile  + "2-5) 특수학교 및 기타학교 현황.xlsx", sheetname ="기타학교")
             schoolDf.columns = schoolDf.iloc[2,0:]
             schoolDf = schoolDf.drop([0,1,2],axis=0)
-        elif g == 'U':
+        elif g == 'u':
             schoolDf = pd.read_excel(pathFile  + "1-1) 대학 현황.xlsx")
             schoolDf.columns = schoolDf.iloc[4,0:]
             schoolDf.rename(columns={"학교명(국문)":"학교명"}, inplace = True)
             schoolDf = schoolDf.drop([0,1,2,3,4],axis=0)
-        elif g == 'G':
+        elif g == 'g':
             schoolDf = pd.read_excel(pathFile  + "1-2) 대학원 현황.xlsx")
             schoolDf.columns = schoolDf.iloc[4,0:]
             schoolDf.rename(columns={"학교명(국문)":"학교명"}, inplace = True)
@@ -261,17 +264,15 @@ def getParentPaid(args):
     # End Loop Grade
     driver.close()
 
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-b', '--browser', choices=['I', 'C', 'P'], default='C'
-                      , help=textwrap.dedent('''\
-                        Select Brower.
-                        I=IE, C=Chrome, P=PhantomJS '''))
-    parser.add_argument('-g', '--grade', choices=['E', 'M', 'H', 'U', 'G', 'S', 'O'], default='EMHUGSO'
-                      , help=textwrap.dedent('''\
-                        Select Grade.
-                        E = Elementary School, M = Middle School, H = High School
-                      , U = University, G = Graduate School
-                      , S = SpecialSchool, O = Others '''))
+    parser = argparse.ArgumentParser(description='description: 학교알리미 Web Crawler'
+                                   , formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-b', '--browser', choices=['i', 'c', 'p'], default='c'
+                      , help='''사용할 인터넷 브라우저 선택(팬텀JS는 백그라운드실행)\ni = IE, c = Chrome, p = PhantomJS''')
+    parser.add_argument('-l','--latest',choices = ['l','a'] , default='l'
+                      , help='''가장 최근에 등록된 예결산서만 취득\n  l = Latest\n, a = All''')
+    parser.add_argument('-g', '--grade', choices=['e', 'm', 'h', 'u', 'g', 's', 'o','a'], default='a' 
+                      , help='''학교등급 선택\n  e = Elementary School\n, m = Middle School\n, h = High School , u = University\n, g = Graduate School\n, s = SpecialSchool, o = Others\n, a = All Grades''')
     args, unparsed = parser.parse_known_args()
     getParentPaid(args)
