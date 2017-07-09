@@ -124,8 +124,8 @@ def getParentPaid(args):
 
         countPublic = 0
         countPrivate = 0
-        for idx, row in schoolDf.iloc[:2].iterrows():
-#        for idx, row in schoolDf.iterrows():
+#        for idx, row in schoolDf.iloc[:2].iterrows():
+        for idx, row in schoolDf.iterrows():
 
             schoolName = row['학교명'].strip()
             schoolURL = row['홈페이지'].strip()
