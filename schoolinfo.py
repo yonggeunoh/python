@@ -15,7 +15,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import ElementNotVisibleException
 
 
-def getParentPaidSelenium(args):
+def getParentPaid(args):
 
     logging.basicConfig(filename='.\\schoolinfo.log'
                       , level=logging.DEBUG
@@ -29,11 +29,14 @@ def getParentPaidSelenium(args):
     driver = None
     schoolDf = None
     schoolDfempty = None
+    acctPblcDf = None
+    acctPrvtDf = None
     pathFile = '.\\file\\'
     pathWebDriver = '.\\webdriver\\'
     pathResult = '.\\result\\'
 
-    
+
+
     grade = { 'e':'ElementarySchool'
             , 'm':'MiddleSchool'
             , 'h':'HighSchool'
@@ -49,27 +52,7 @@ def getParentPaidSelenium(args):
     else:
         gList.clear()
         gList.append(args.grade)
-
-
-    
-    # 국공립학교 계정
-    acctPblcDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입','등록금'
-                                   ,'학교운영지원비', '수익자부담수입','급식비'
-                                   ,'방과후학교활동비', '현장체험학습비','청소년단체활동비'
-                                   ,'졸업앨범대금', '교과서대금','기숙사비','기타수익자부담수입'
-                                   ,'누리과정비','교복구입비','운동부운영비')
-                         , index = None)
-    # 사립학교 계정
-    acctPrvtDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입' ,'등록금'
-                                   ,'입학금' ,'수업료' ,'학교운영지원비' ,'수익자부담수입'
-                                   ,'급식비' ,'방과후학교활동비' ,'현장체험학습비'
-                                   ,'청소년단체활동비' ,'졸업앨범대금' ,'교과서대금'
-                                   ,'기숙사비' ,'기타수익자부담수입' ,'누리과정비'
-                                   ,'교복구입비','운동부운영비')  
-                         , index = None)
-
-
-        
+       
     logger.info(u'웹드라이버 선택(팬텀은 화면표시 없음)')
     if args.browser == 'c':
         driver = webdriver.Chrome(pathWebDriver + "chromedriver")
@@ -125,15 +108,32 @@ def getParentPaidSelenium(args):
 
 
         logger.info('변수 초기화')
-        countPublic = 0
-        countPrivate = 0
         schooltype = 'thead'
+        countPblc = 0
+        countPrvt = 0
+        # 국공립학교 계정
+        acctPblcDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입','등록금'
+                                       ,'학교운영지원비', '수익자부담수입','급식비'
+                                       ,'방과후학교활동비', '현장체험학습비','청소년단체활동비'
+                                       ,'졸업앨범대금', '교과서대금','기숙사비','기타수익자부담수입'
+                                       ,'누리과정비','교복구입비','운동부운영비')
+                             , index = None)
+        # 사립학교 계정
+        acctPrvtDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입' ,'등록금'
+                                       ,'입학금' ,'수업료' ,'학교운영지원비' ,'수익자부담수입'
+                                       ,'급식비' ,'방과후학교활동비' ,'현장체험학습비'
+                                       ,'청소년단체활동비' ,'졸업앨범대금' ,'교과서대금'
+                                       ,'기숙사비' ,'기타수익자부담수입' ,'누리과정비'
+                                       ,'교복구입비','운동부운영비')  
+                             , index = None)
 
-        for idx, row in schoolDf.iloc[:3].iterrows():
+        for idx, row in schoolDf.iloc[:5].iterrows():
 #        for idx, row in schoolDf.iterrows():
 
+            # 
+
             logger.info('웹 호출')
-            driver.implicitly_wait(10)
+            driver.implicitly_wait(3)
             driver.get('http://www.schoolinfo.go.kr')
             
             schoolName = row['학교명'].strip()
@@ -237,7 +237,7 @@ def getParentPaidSelenium(args):
                         existDetail.click()
 
                     cell = []
-                    print(schoolName)
+                    print(schoolName + " " + openYYmm)
                     cell.append(schoolName)
                     cell.append(establish)
                     cell.append(openYYmm)
@@ -263,11 +263,11 @@ def getParentPaidSelenium(args):
 
                     # 파일 쓰기
                     if establish in ('국립','공립'):
-                        acctPblcDf.loc[countPublic] = cell
-                        countPublic += 1
+                        acctPblcDf.loc[countPblc] = cell
+                        countPblc += 1
                     elif establish == '사립':
-                        acctPrvtDf.loc[countPrivate] = cell
-                        countPrivate += 1
+                        acctPrvtDf.loc[countPrvt] = cell
+                        countPrvt += 1
 
             except NoSuchElementException as e:
                 logger.exception(schoolName + e.msg)
@@ -282,6 +282,7 @@ def getParentPaidSelenium(args):
                 pass
 
 
+        
         #End Loop schoolDf
         logger.info(schoolName + ": 파일 저장(" + grade.get(g) +")")
         acctPblcDf.to_excel(pathResult + grade.get(g) + 'Public.xlsx' ,  header=True, index=True)
@@ -300,4 +301,4 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--grade', choices=['e', 'm', 'h', 'u', 'g', 's', 'o','a'], default='a' 
                       , help='''학교등급 선택\n  e = Elementary School\n, m = Middle School\n, h = High School\n, u = University\n, g = Graduate School\n, s = SpecialSchool\n, o = Others\n, a = All Grades''')
     args, unparsed = parser.parse_known_args()
-    getParentPaidSelenium(args)
+    getParentPaid(args)
