@@ -51,6 +51,22 @@ def getParentPaidSelenium(args):
         gList.append(args.grade)
 
 
+    
+    # 국공립학교 계정
+    acctPblcDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입','등록금'
+                                   ,'학교운영지원비', '수익자부담수입','급식비'
+                                   ,'방과후학교활동비', '현장체험학습비','청소년단체활동비'
+                                   ,'졸업앨범대금', '교과서대금','기숙사비','기타수익자부담수입'
+                                   ,'누리과정비','교복구입비','운동부운영비')
+                         , index = None)
+    # 사립학교 계정
+    acctPrvtDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입' ,'등록금'
+                                   ,'입학금' ,'수업료' ,'학교운영지원비' ,'수익자부담수입'
+                                   ,'급식비' ,'방과후학교활동비' ,'현장체험학습비'
+                                   ,'청소년단체활동비' ,'졸업앨범대금' ,'교과서대금'
+                                   ,'기숙사비' ,'기타수익자부담수입' ,'누리과정비'
+                                   ,'교복구입비','운동부운영비')  
+                         , index = None)
 
 
         
@@ -113,8 +129,8 @@ def getParentPaidSelenium(args):
         countPrivate = 0
         schooltype = 'thead'
 
-#        for idx, row in schoolDf.iloc[:10].iterrows():
-        for idx, row in schoolDf.iterrows():
+        for idx, row in schoolDf.iloc[:3].iterrows():
+#        for idx, row in schoolDf.iterrows():
 
             logger.info('웹 호출')
             driver.implicitly_wait(10)
@@ -207,21 +223,6 @@ def getParentPaidSelenium(args):
                 logger.info(schoolName + '공시년월 목록 선택')
                 select = Select(driver.find_element_by_id('select_trans_dt'))
                 
-                # 국공립학교 계정
-                acctPblcDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입','등록금'
-                                               ,'학교운영지원비', '수익자부담수입','급식비'
-                                               ,'방과후학교활동비', '현장체험학습비','청소년단체활동비'
-                                               ,'졸업앨범대금', '교과서대금','기숙사비','기타수익자부담수입'
-                                               ,'누리과정비','교복구입비','운동부운영비')
-                                     , index = None)
-                # 사립학교 계정
-                acctPrvtDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입' ,'등록금'
-                                               ,'입학금' ,'수업료' ,'학교운영지원비' ,'수익자부담수입'
-                                               ,'급식비' ,'방과후학교활동비' ,'현장체험학습비'
-                                               ,'청소년단체활동비' ,'졸업앨범대금' ,'교과서대금'
-                                               ,'기숙사비' ,'기타수익자부담수입' ,'누리과정비'
-                                               ,'교복구입비','운동부운영비')  
-                                     , index = None)
                 for index in range(len(select.options)):
 
                     select = Select(driver.find_element_by_id('select_trans_dt'))
