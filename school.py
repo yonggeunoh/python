@@ -7,47 +7,39 @@ Created on Thu Jul  6 13:40:56 2017
 import argparse
 import pandas as pd
 import logging
-import logging.handlers
 from pandas import DataFrame
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import ElementNotVisibleException
 
 
-def getParentPaid(args):
+def getParentPaidSelenium(args):
 
-    logging.basicConfig(filename='.\\school.log'
+    logging.basicConfig(filename='.\\schoolinfo.log'
                       , level=logging.DEBUG
                       , format='%(asctime)s %(message)s'
                       , datefmt='%Y/%m/%d %I:%M:%S %p')
-    # logger 인스턴스를 생성 및 로그 레벨 설정
     logger = logging.getLogger("crumbs")
-    logger.setLevel(logging.DEBUG)
-    # formmater 생성
-#    formatter = logging.Formatter(fmt='[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s'
-#                                , datefmt='%Y/%m/%d %I:%M:%S %p')
-#    # fileHandler와 StreamHandler를 생성
-#    fileHandler = logging.FileHandler('.\\school.log',encoding='utf-8')
-#    streamHandler = logging.StreamHandler()
-#    # handler에 fommater 세팅
-#    fileHandler.setFormatter(formatter)
-#    streamHandler.setFormatter(formatter)
-#    # Handler를 logging에 추가
-#    logger.addHandler(fileHandler)
-#    logger.addHandler(streamHandler)
-    # logging logger.debug("debug")
+    logger.setLevel(logging.INFO)
 
     logger.info('ParentPaid Start !!')
     
     driver = None
     schoolDf = None
+    schoolDfempty = None
     pathFile = '.\\file\\'
     pathWebDriver = '.\\webdriver\\'
+    pathResult = '.\\result\\'
 
     
-    grade = { 'e':'ElementarySchool', 'm':'MiddleSchool'   , 'h':'HighSchool'
-            , 'u':'University' , 'g':'GraduateSchool' , 's':'SpecialSchool'
+    grade = { 'e':'ElementarySchool'
+            , 'm':'MiddleSchool'
+            , 'h':'HighSchool'
+            , 'u':'University'
+            , 'g':'GraduateSchool'
+            , 's':'SpecialSchool'
             , 'o':'Others' }
     
     gList = list(grade.keys())
@@ -55,35 +47,31 @@ def getParentPaid(args):
     if args.grade == 'a':
         gList = gList
     else:
-        gList = args.grade
+        gList.clear()
+        gList.append(args.grade)
 
-    # 국공립학교 계정
-    acctPblcDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입','등록금'
-                                   ,'학교운영지원비', '수익자부담수입','급식비'
-                                   ,'방과후학교활동비', '현장체험학습비','청소년단체활동비'
-                                   ,'졸업앨범대금', '교과서대금','기숙사비','기타수익자부담수입'
-                                   ,'누리과정비','교복구입비','운동부운영비'), index=None  )
-    # 사립학교 계정
-    acctPrvtDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입' ,'등록금'
-                                   ,'입학금' ,'수업료' ,'학교운영지원비' ,'수익자부담수입'
-                                   ,'급식비' ,'방과후학교활동비' ,'현장체험학습비'
-                                   ,'청소년단체활동비' ,'졸업앨범대금' ,'교과서대금'
-                                   ,'기숙사비' ,'기타수익자부담수입' ,'누리과정비'
-                                   ,'교복구입비','운동부운영비'), index=None  )
+
+
 
         
     logger.info(u'웹드라이버 선택(팬텀은 화면표시 없음)')
-    if args.browser == 'C':
+    if args.browser == 'c':
         driver = webdriver.Chrome(pathWebDriver + "chromedriver")
-    elif args.browser == 'P':
+    elif args.browser == 'p':
         driver = webdriver.PhantomJS(pathWebDriver + "phantomjs-2.1.1-windows\\bin\\phantomjs")
-    elif args.browser == 'I':
+    elif args.browser == 'i':
         driver = webdriver.Ie(pathWebDriver + "IEDriverServer_win32_2.45.0")
     else:
         driver = webdriver.Chrome(pathWebDriver + "chromedriver")
 
     logger.info('학교등급 선택')
+    
+    
     for g in gList:
+        schoolDf = schoolDfempty
+        
+        print(g)
+        
         logger.info(grade.get(g) + '학교목록 읽어오기')
         if g == 'e':
             schoolDf = pd.read_excel(pathFile  + "2-2) 초등학교 현황.xlsx")
@@ -97,14 +85,6 @@ def getParentPaid(args):
             schoolDf = pd.read_excel(pathFile  + "2-4) 고등학교 현황.xlsx")
             schoolDf.columns = schoolDf.iloc[2,0:]
             schoolDf = schoolDf.drop([0,1,2],axis=0)
-        elif g == 's':
-            schoolDf = pd.read_excel(pathFile  + "2-5) 특수학교 및 기타학교 현황.xlsx", sheetname ="특수학교")
-            schoolDf.columns = schoolDf.iloc[2,0:]
-            schoolDf = schoolDf.drop([0,1,2],axis=0)
-        elif g == 'o':
-            schoolDf = pd.read_excel(pathFile  + "2-5) 특수학교 및 기타학교 현황.xlsx", sheetname ="기타학교")
-            schoolDf.columns = schoolDf.iloc[2,0:]
-            schoolDf = schoolDf.drop([0,1,2],axis=0)
         elif g == 'u':
             schoolDf = pd.read_excel(pathFile  + "1-1) 대학 현황.xlsx")
             schoolDf.columns = schoolDf.iloc[4,0:]
@@ -115,6 +95,14 @@ def getParentPaid(args):
             schoolDf.columns = schoolDf.iloc[4,0:]
             schoolDf.rename(columns={"학교명(국문)":"학교명"}, inplace = True)
             schoolDf = schoolDf.drop([0,1,2,3,4],axis=0)
+        elif g == 's':
+            schoolDf = pd.read_excel(pathFile  + "2-5) 특수학교 및 기타학교 현황.xlsx", sheetname ="특수학교")
+            schoolDf.columns = schoolDf.iloc[2,0:]
+            schoolDf = schoolDf.drop([0,1,2],axis=0)
+        elif g == 'o':
+            schoolDf = pd.read_excel(pathFile  + "2-5) 특수학교 및 기타학교 현황.xlsx", sheetname ="기타학교")
+            schoolDf.columns = schoolDf.iloc[3,0:]
+            schoolDf = schoolDf.drop([0,1,2,3],axis=0)
         else:
             pass
 
@@ -125,29 +113,36 @@ def getParentPaid(args):
         countPrivate = 0
         schooltype = 'thead'
 
-#        for idx, row in schoolDf.iloc[:3].iterrows():
+#        for idx, row in schoolDf.iloc[:10].iterrows():
         for idx, row in schoolDf.iterrows():
 
             logger.info('웹 호출')
-            driver.implicitly_wait(5)
+            driver.implicitly_wait(10)
             driver.get('http://www.schoolinfo.go.kr')
             
             schoolName = row['학교명'].strip()
-            schoolURL = row['홈페이지'].strip()
-            logger.info(schoolName + '학교 Loop Start')
-
+            schoolURL  = row['홈페이지'].strip()
+            
+            print(schoolName + " " + schoolURL)
+            
+            logger.info(schoolName + ': Loop Start')
 
             try:
                 driver.find_element_by_id("SEARCH_KEYWORD").send_keys("")
                 driver.find_element_by_id("SEARCH_KEYWORD").send_keys(schoolName)
                 driver.find_element_by_xpath("//button[@title='검색하기']").click()
 
-                logger.info(schoolName + '학교검색결과 더보기버튼')
+                logger.info(schoolName + ': btnMore')
                 while 1:
                     try:
                         driver.find_element_by_id("btnMore")
-                    except NoSuchElementException:
+                    except NoSuchElementException as e:
+                        logger.exception(schoolName + ": btnMore" + e.msg)
                         break
+                    except ElementNotVisibleException as e:
+                        logger.exception(schoolName + ": btnMore" + e.msg)
+                        break
+                    
                     driver.find_element_by_id("btnMore").click()
 
                 logger.info(schoolName + '학교검색결과 색인')
@@ -202,7 +197,6 @@ def getParentPaid(args):
 
                 else:
                     pass
-                    # raise_exception(schoolName + " pass !!!")
 
                 logger.info(schoolName + 'iframe 해제')
                 driver.switch_to_frame(driver.find_element_by_xpath("//iframe"))
@@ -212,20 +206,37 @@ def getParentPaid(args):
 
                 logger.info(schoolName + '공시년월 목록 선택')
                 select = Select(driver.find_element_by_id('select_trans_dt'))
-
+                
+                # 국공립학교 계정
+                acctPblcDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입','등록금'
+                                               ,'학교운영지원비', '수익자부담수입','급식비'
+                                               ,'방과후학교활동비', '현장체험학습비','청소년단체활동비'
+                                               ,'졸업앨범대금', '교과서대금','기숙사비','기타수익자부담수입'
+                                               ,'누리과정비','교복구입비','운동부운영비')
+                                     , index = None)
+                # 사립학교 계정
+                acctPrvtDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입' ,'등록금'
+                                               ,'입학금' ,'수업료' ,'학교운영지원비' ,'수익자부담수입'
+                                               ,'급식비' ,'방과후학교활동비' ,'현장체험학습비'
+                                               ,'청소년단체활동비' ,'졸업앨범대금' ,'교과서대금'
+                                               ,'기숙사비' ,'기타수익자부담수입' ,'누리과정비'
+                                               ,'교복구입비','운동부운영비')  
+                                     , index = None)
                 for index in range(len(select.options)):
+
                     select = Select(driver.find_element_by_id('select_trans_dt'))
                     select.select_by_index(index)
                     openYYmm = driver.find_element_by_xpath("//select[@id='select_trans_dt']/option[@selected='']").text
+
                     logger.info(schoolName + '공시년월별 자세히 보기 Loop : ' )
-                    
-                    
-                    
+
                     existDetail = driver.find_element_by_xpath("//div[@id='btnDetail']/a")
+
                     if existDetail.is_displayed():
                         existDetail.click()
 
                     cell = []
+                    print(schoolName)
                     cell.append(schoolName)
                     cell.append(establish)
                     cell.append(openYYmm)
@@ -257,11 +268,11 @@ def getParentPaid(args):
                         acctPrvtDf.loc[countPrivate] = cell
                         countPrivate += 1
 
-            except NoSuchElementException:
-                print(schoolName + " NoSuchElementException !!!" )
+            except NoSuchElementException as e:
+                logger.exception(schoolName + e.msg)
                 pass
-            except StaleElementReferenceException:
-                print(schoolName + " 실패 StaleElementReferenceException !!!" )
+            except StaleElementReferenceException as e:
+                logger.exception(schoolName + e.msg)
                 '''
                 StaleElementReferenceException caused by.. 
                 - The element has been deleted entirely.
@@ -271,24 +282,21 @@ def getParentPaid(args):
 
 
         #End Loop schoolDf
-        # 파일 저장
-        acctPblcDf.to_excel('.\\'+grade.get(g)+'Public.xlsx',  header=True, index=True)
-        acctPrvtDf.to_excel('.\\'+grade.get(g)+'Private.xlsx',  header=True, index=True)
+        logger.info(schoolName + ": 파일 저장(" + grade.get(g) +")")
+        acctPblcDf.to_excel(pathResult + grade.get(g) + 'Public.xlsx' ,  header=True, index=True)
+        acctPrvtDf.to_excel(pathResult + grade.get(g) + 'Private.xlsx',  header=True, index=True)
 
     # End Loop Grade
     driver.close()
     driver.quit()
-    
     
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='description: 학교알리미 Web Crawler'
                                    , formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-b', '--browser', choices=['i', 'c', 'p'], default='c'
-                      , help='''사용할 인터넷 브라우저 선택(팬텀JS는 백그라운드실행)\ni = IE, c = Chrome, p = PhantomJS''')
-#    parser.add_argument('-l','--latest',choices = ['l','a'] , default='l'
-#                      , help='''가장 최근에 등록된 예결산서만 취득\n  l = Latest\n, a = All''')
+                      , help='''사용할 인터넷 브라우저 선택(p는 백그라운드실행)\ni = IE, c = Chrome, p = PhantomJS''')
     parser.add_argument('-g', '--grade', choices=['e', 'm', 'h', 'u', 'g', 's', 'o','a'], default='a' 
-                      , help='''학교등급 선택\n  e = Elementary School\n, m = Middle School\n, h = High School , u = University\n, g = Graduate School\n, s = SpecialSchool, o = Others\n, a = All Grades''')
+                      , help='''학교등급 선택\n  e = Elementary School\n, m = Middle School\n, h = High School\n, u = University\n, g = Graduate School\n, s = SpecialSchool\n, o = Others\n, a = All Grades''')
     args, unparsed = parser.parse_known_args()
-    getParentPaid(args)
+    getParentPaidSelenium(args)
