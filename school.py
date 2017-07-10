@@ -16,34 +16,35 @@ from selenium.common.exceptions import StaleElementReferenceException
 
 
 def getParentPaid(args):
-    logging.basicConfig(filename='.\\school.log',  encoding = "utf-8",  level=logging.DEBUG)
 
+    logging.basicConfig(filename='.\\school.log'
+                      , level=logging.DEBUG
+                      , format='%(asctime)s %(message)s'
+                      , datefmt='%Y/%m/%d %I:%M:%S %p')
     # logger 인스턴스를 생성 및 로그 레벨 설정
     logger = logging.getLogger("crumbs")
     logger.setLevel(logging.DEBUG)
     # formmater 생성
-    formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
-    # fileHandler와 StreamHandler를 생성
-    fileHandler = logging.FileHandler('.\\school.log')
-    streamHandler = logging.StreamHandler()
-    # handler에 fommater 세팅
-    fileHandler.setFormatter(formatter)
-    streamHandler.setFormatter(formatter)
-    # Handler를 logging에 추가
-    logger.addHandler(fileHandler)
-    logger.addHandler(streamHandler)
+#    formatter = logging.Formatter(fmt='[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s'
+#                                , datefmt='%Y/%m/%d %I:%M:%S %p')
+#    # fileHandler와 StreamHandler를 생성
+#    fileHandler = logging.FileHandler('.\\school.log',encoding='utf-8')
+#    streamHandler = logging.StreamHandler()
+#    # handler에 fommater 세팅
+#    fileHandler.setFormatter(formatter)
+#    streamHandler.setFormatter(formatter)
+#    # Handler를 logging에 추가
+#    logger.addHandler(fileHandler)
+#    logger.addHandler(streamHandler)
     # logging logger.debug("debug")
+
+    logger.info('ParentPaid Start !!')
     
-    
-    
-    
-    schoolDf = None
-    acctPblcDf = None
-    acctPrvtDf = None
     driver = None
+    schoolDf = None
     pathFile = '.\\file\\'
     pathWebDriver = '.\\webdriver\\'
-    logger.info('ParentPaid Start !!')
+
     
     grade = { 'e':'ElementarySchool', 'm':'MiddleSchool'   , 'h':'HighSchool'
             , 'u':'University' , 'g':'GraduateSchool' , 's':'SpecialSchool'
@@ -51,6 +52,10 @@ def getParentPaid(args):
     
     gList = list(grade.keys())
     
+    if args.grade == 'a':
+        gList = gList
+    else:
+        gList = args.grade
 
     # 국공립학교 계정
     acctPblcDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입','등록금'
@@ -66,14 +71,8 @@ def getParentPaid(args):
                                    ,'기숙사비' ,'기타수익자부담수입' ,'누리과정비'
                                    ,'교복구입비','운동부운영비'), index=None  )
 
-    if args.grade == 'a':
-        gList = gList
-    else:
-        gList = args.grade
         
-        
-        
-    logger.info('웹드라이버 선택(팬텀은 화면표시 없음)')
+    logger.info(u'웹드라이버 선택(팬텀은 화면표시 없음)')
     if args.browser == 'C':
         driver = webdriver.Chrome(pathWebDriver + "chromedriver")
     elif args.browser == 'P':
@@ -85,7 +84,7 @@ def getParentPaid(args):
 
     logger.info('학교등급 선택')
     for g in gList:
-        logger.info('학교정보 읽어오기')
+        logger.info(grade.get(g) + '학교목록 읽어오기')
         if g == 'e':
             schoolDf = pd.read_excel(pathFile  + "2-2) 초등학교 현황.xlsx")
             schoolDf.columns = schoolDf.iloc[2,0:]
@@ -120,28 +119,30 @@ def getParentPaid(args):
             pass
 
 
-        logger.info('학교 루프 시작')
 
+        logger.info('변수 초기화')
         countPublic = 0
         countPrivate = 0
-#        for idx, row in schoolDf.iloc[:2].iterrows():
-        for idx, row in schoolDf.iterrows():
+        schooltype = 'thead'
 
-            schoolName = row['학교명'].strip()
-            schoolURL = row['홈페이지'].strip()
+#        for idx, row in schoolDf.iloc[:3].iterrows():
+        for idx, row in schoolDf.iterrows():
 
             logger.info('웹 호출')
             driver.implicitly_wait(5)
             driver.get('http://www.schoolinfo.go.kr')
-            logger.info('변수 초기화')
-            schooltype = 'thead'
+            
+            schoolName = row['학교명'].strip()
+            schoolURL = row['홈페이지'].strip()
+            logger.info(schoolName + '학교 Loop Start')
+
 
             try:
                 driver.find_element_by_id("SEARCH_KEYWORD").send_keys("")
                 driver.find_element_by_id("SEARCH_KEYWORD").send_keys(schoolName)
                 driver.find_element_by_xpath("//button[@title='검색하기']").click()
 
-                logger.info('학교검색결과 더보기버튼')
+                logger.info(schoolName + '학교검색결과 더보기버튼')
                 while 1:
                     try:
                         driver.find_element_by_id("btnMore")
@@ -149,16 +150,16 @@ def getParentPaid(args):
                         break
                     driver.find_element_by_id("btnMore").click()
 
-                logger.info('학교검색결과 색인')
+                logger.info(schoolName + '학교검색결과 색인')
                 driver.find_element_by_xpath("//a[@href='"+schoolURL+"']/parent::span/parent::li/parent::ul/parent::article/h1[@class='School_Name']/a").click()
 
-                logger.info('국공사립 구분확인')
+                logger.info(schoolName + '국공사립 구분확인')
                 establish = driver.find_element_by_xpath("//ul[@class='School_Data']/li[2]").text[5:]
 
-                logger.info('상세정보 클릭')
+                logger.info(schoolName + '상세정보 클릭')
                 driver.find_element_by_link_text('상세정보').click()
 
-                logger.info('예결산서 클릭')
+                logger.info(schoolName + '예결산서 클릭')
                 if establish in ('국립','공립'):
                     schooltype = 'thead'
                     colNo01 = '22'
@@ -203,32 +204,31 @@ def getParentPaid(args):
                     pass
                     # raise_exception(schoolName + " pass !!!")
 
-                logger.info('iframe 해제')
+                logger.info(schoolName + 'iframe 해제')
                 driver.switch_to_frame(driver.find_element_by_xpath("//iframe"))
 
-                logger.info('자세히보기 클릭')
+                logger.info(schoolName + '자세히보기 클릭')
                 driver.find_element_by_id("btnDetail").click()
 
-                logger.info('공시년월 목록 선택')
+                logger.info(schoolName + '공시년월 목록 선택')
                 select = Select(driver.find_element_by_id('select_trans_dt'))
 
-                logger.info('공시년월별 자세히 보기 루프')
                 for index in range(len(select.options)):
-                    logger.info('공시년월별 자세히 보기 루프 select_by_index' + index)
                     select = Select(driver.find_element_by_id('select_trans_dt'))
                     select.select_by_index(index)
-
-                    logger.info('공시년월별 자세히 보기 루프 existDetail')
+                    openYYmm = driver.find_element_by_xpath("//select[@id='select_trans_dt']/option[@selected='']").text
+                    logger.info(schoolName + '공시년월별 자세히 보기 Loop : ' )
+                    
+                    
+                    
                     existDetail = driver.find_element_by_xpath("//div[@id='btnDetail']/a")
                     if existDetail.is_displayed():
-                        logger.info('공시년월별 자세히 보기 루프 existDetail.click()')
                         existDetail.click()
 
-                    logger.info('공시년월별 자세히 보기 루프 cell')
                     cell = []
                     cell.append(schoolName)
                     cell.append(establish)
-                    cell.append(driver.find_element_by_xpath("//select[@id='select_trans_dt']/option[@selected='']").text)
+                    cell.append(openYYmm)
                     cell.append(driver.find_element_by_xpath("//table[@class='TableType1']/"+schooltype+"/tr["+ colNo01 +"]/td").text)
                     cell.append(driver.find_element_by_xpath("//table[@class='TableType1']/"+schooltype+"/tr["+ colNo02 +"]/td").text)
                     cell.append(driver.find_element_by_xpath("//table[@class='TableType1']/"+schooltype+"/tr["+ colNo03 +"]/td").text)
@@ -262,6 +262,11 @@ def getParentPaid(args):
                 pass
             except StaleElementReferenceException:
                 print(schoolName + " 실패 StaleElementReferenceException !!!" )
+                '''
+                StaleElementReferenceException caused by.. 
+                - The element has been deleted entirely.
+                - The element is no longer attached to the DOM.
+                '''
                 pass
 
 
@@ -274,14 +279,15 @@ def getParentPaid(args):
     driver.close()
     driver.quit()
     
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='description: 학교알리미 Web Crawler'
                                    , formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-b', '--browser', choices=['i', 'c', 'p'], default='c'
                       , help='''사용할 인터넷 브라우저 선택(팬텀JS는 백그라운드실행)\ni = IE, c = Chrome, p = PhantomJS''')
-    parser.add_argument('-l','--latest',choices = ['l','a'] , default='l'
-                      , help='''가장 최근에 등록된 예결산서만 취득\n  l = Latest\n, a = All''')
+#    parser.add_argument('-l','--latest',choices = ['l','a'] , default='l'
+#                      , help='''가장 최근에 등록된 예결산서만 취득\n  l = Latest\n, a = All''')
     parser.add_argument('-g', '--grade', choices=['e', 'm', 'h', 'u', 'g', 's', 'o','a'], default='a' 
                       , help='''학교등급 선택\n  e = Elementary School\n, m = Middle School\n, h = High School , u = University\n, g = Graduate School\n, s = SpecialSchool, o = Others\n, a = All Grades''')
     args, unparsed = parser.parse_known_args()
