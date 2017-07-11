@@ -130,8 +130,8 @@ def getParentPaid(args):
                                        ,'교복구입비','운동부운영비')  
                              , index = None)
 
-        for idx, row in schoolDf.iloc[:10].iterrows():
-#        for idx, row in schoolDf.iterrows():
+#        for idx, row in schoolDf.iloc[:10].iterrows():
+        for idx, row in schoolDf.iterrows():
 
             logger.info('웹 호출')
             driver.implicitly_wait(3)
@@ -157,7 +157,7 @@ def getParentPaid(args):
                         logger.exception(schoolName + ": btnMore" + e.msg)
                         break
                     except Exception as e:
-                        f.write(schoolName + ": btnMore" + e.msg)
+                        f.write(schoolName + ": btnMore" + e.msg + "\n")
                         logger.exception(schoolName + ": btnMore" + e.msg)
                         break
                     
@@ -272,19 +272,19 @@ def getParentPaid(args):
                         countPrvt += 1
 
             except NoSuchElementException as e:
-                f.write(schoolName + e.msg)
+                f.write(schoolName + e.msg+ "\n")
                 logger.exception(schoolName + e.msg)
                 pass
             except StaleElementReferenceException as e:
-                f.write(schoolName + e.msg)
+                f.write(schoolName + e.msg+ "\n")
                 logger.exception(schoolName + e.msg)
                 pass
             except ElementNotVisibleException as e:
-                f.write(schoolName + e.msg)
+                f.write(schoolName + e.msg+ "\n")
                 logger.exception(schoolName + e.msg)
                 pass
             except Exception as e:
-                f.write(schoolName + e.msg)
+                f.write(schoolName + e.msg+ "\n")
                 logger.exception(schoolName + e.msg)
                 pass
 
