@@ -17,15 +17,6 @@ from selenium.common.exceptions import ElementNotVisibleException
 
 def getParentPaid(args):
 
-    logging.basicConfig(filename='.\\schoolinfo.log'
-                      , level=logging.DEBUG
-                      , format='%(asctime)s %(message)s'
-                      , datefmt='%Y/%m/%d %I:%M:%S %p')
-    logger = logging.getLogger("crumbs")
-    logger.setLevel(logging.INFO)
-
-    logger.info('ParentPaid Start !!')
-    
     driver = None
     schoolDf = None
     schoolDfempty = None
@@ -34,8 +25,16 @@ def getParentPaid(args):
     pathFile = '.\\file\\'
     pathWebDriver = '.\\webdriver\\'
     pathResult = '.\\result\\'
+    pathLog = '.\\log\\'
+    
+    logging.basicConfig(filename = pathLog + 'schoolinfo.log'
+                      , level = logging.DEBUG
+                      , format = '%(asctime)s %(message)s'
+                      , datefmt = '%Y/%m/%d %I:%M:%S %p')
+    logger = logging.getLogger("crumbs")
+    logger.setLevel(logging.INFO)
 
-
+    logger.info('ParentPaid Start !!')
 
     grade = { 'e':'ElementarySchool'
             , 'm':'MiddleSchool'
@@ -52,7 +51,11 @@ def getParentPaid(args):
     else:
         gList.clear()
         gList.append(args.grade)
-       
+    
+    
+    f = open(pathLog + "schoolinfo_Error.log", 'w')
+    
+    
     logger.info(u'웹드라이버 선택(팬텀은 화면표시 없음)')
     if args.browser == 'c':
         driver = webdriver.Chrome(pathWebDriver + "chromedriver")
@@ -69,7 +72,7 @@ def getParentPaid(args):
     for g in gList:
         schoolDf = schoolDfempty
         
-        print(g)
+        print(grade.get(g) + " 처리")
         
         logger.info(grade.get(g) + '학교목록 읽어오기')
         if g == 'e':
@@ -105,12 +108,11 @@ def getParentPaid(args):
         else:
             pass
 
-
-
         logger.info('변수 초기화')
         schooltype = 'thead'
         countPblc = 0
         countPrvt = 0
+
         # 국공립학교 계정
         acctPblcDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입','등록금'
                                        ,'학교운영지원비', '수익자부담수입','급식비'
@@ -118,6 +120,7 @@ def getParentPaid(args):
                                        ,'졸업앨범대금', '교과서대금','기숙사비','기타수익자부담수입'
                                        ,'누리과정비','교복구입비','운동부운영비')
                              , index = None)
+
         # 사립학교 계정
         acctPrvtDf = DataFrame(columns=('학교명','구분', '공시년월','학부모부담수입' ,'등록금'
                                        ,'입학금' ,'수업료' ,'학교운영지원비' ,'수익자부담수입'
@@ -127,10 +130,8 @@ def getParentPaid(args):
                                        ,'교복구입비','운동부운영비')  
                              , index = None)
 
-        for idx, row in schoolDf.iloc[:5].iterrows():
+        for idx, row in schoolDf.iloc[:10].iterrows():
 #        for idx, row in schoolDf.iterrows():
-
-            # 
 
             logger.info('웹 호출')
             driver.implicitly_wait(3)
@@ -155,7 +156,8 @@ def getParentPaid(args):
                     except NoSuchElementException as e:
                         logger.exception(schoolName + ": btnMore" + e.msg)
                         break
-                    except ElementNotVisibleException as e:
+                    except Exception as e:
+                        f.write(schoolName + ": btnMore" + e.msg)
                         logger.exception(schoolName + ": btnMore" + e.msg)
                         break
                     
@@ -270,19 +272,22 @@ def getParentPaid(args):
                         countPrvt += 1
 
             except NoSuchElementException as e:
+                f.write(schoolName + e.msg)
                 logger.exception(schoolName + e.msg)
                 pass
             except StaleElementReferenceException as e:
+                f.write(schoolName + e.msg)
                 logger.exception(schoolName + e.msg)
-                '''
-                StaleElementReferenceException caused by.. 
-                - The element has been deleted entirely.
-                - The element is no longer attached to the DOM.
-                '''
+                pass
+            except ElementNotVisibleException as e:
+                f.write(schoolName + e.msg)
+                logger.exception(schoolName + e.msg)
+                pass
+            except Exception as e:
+                f.write(schoolName + e.msg)
+                logger.exception(schoolName + e.msg)
                 pass
 
-
-        
         #End Loop schoolDf
         logger.info(schoolName + ": 파일 저장(" + grade.get(g) +")")
         acctPblcDf.to_excel(pathResult + grade.get(g) + 'Public.xlsx' ,  header=True, index=True)
@@ -291,7 +296,7 @@ def getParentPaid(args):
     # End Loop Grade
     driver.close()
     driver.quit()
-    
+    f.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='description: 학교알리미 Web Crawler'
