@@ -143,14 +143,15 @@ def getParentPaid(args):
         city = None
 
         # 학교 루프
-        for idx, row in schoolDf.iloc[:10].iterrows():
-#        for idx, row in schoolDf.iterrows():
+        # for idx, row in schoolDf.iloc[:10].iterrows():
+       for idx, row in schoolDf.iterrows():
             if city != None and city != row[u'시도'].strip():
                 #End Loop schoolDf
                 logger.info(schoolName + u': 파일 저장(' + grade.get(g) +u')')
                 fileName = pathResult + city + grade.get(g)
                 acctPblcDf.to_excel(fileName + u'공립' + u'.xlsx',  header=True, index=True)
                 acctPrvtDf.to_excel(fileName + u'사립' + u'.xlsx',  header=True, index=True)
+                city = row[u'시도'].strip()
             else:
                 city = row[u'시도'].strip()
 
