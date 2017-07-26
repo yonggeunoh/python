@@ -26,7 +26,7 @@ def getParentPaid(args):
     acctPblcDf = None
     acctPrvtDf = None
     pathFile = '.\\'
-    pathWebDriver = '.\\'
+    pathWebDriver = '.\\webdriver\\'
     pathResult = '.\\'
     pathLog = '.\\'
 
@@ -139,29 +139,35 @@ def getParentPaid(args):
                                        ,u'기숙사비' ,u'기타수익자부담수입' ,u'누리과정비'
                                        ,u'교복구입비',u'운동부운영비')
                              , index = None)
-
+        acctPblcDfEmpty  = acctPblcDf 
+        acctPrvtDfEmpty  = acctPrvtDf 
         city = None
 
         # 학교 루프
-        # for idx, row in schoolDf.iloc[:10].iterrows():
-       for idx, row in schoolDf.iterrows():
+        for idx, row in schoolDf.iloc[:10].iterrows():
+        # for idx, row in schoolDf.iterrows():
+
+            logger.info(u'웹 호출')
+            driver.implicitly_wait(3)
+            driver.get('http://www.schoolinfo.go.kr')
+
+            schoolName = row[u'학교명'].strip()
+            schoolURL = 'http://' + row[u'홈페이지'].strip().replace('http://','')
+            
             if city != None and city != row[u'시도'].strip():
                 #End Loop schoolDf
                 logger.info(schoolName + u': 파일 저장(' + grade.get(g) +u')')
                 fileName = pathResult + city + grade.get(g)
                 acctPblcDf.to_excel(fileName + u'공립' + u'.xlsx',  header=True, index=True)
                 acctPrvtDf.to_excel(fileName + u'사립' + u'.xlsx',  header=True, index=True)
+                acctPblcDf = acctPblcDfEmpty
+                acctPrvtDf = acctPrvtDfEmpty
+
                 city = row[u'시도'].strip()
             else:
                 city = row[u'시도'].strip()
 
             try:
-                logger.info(u'웹 호출')
-                driver.implicitly_wait(3)
-                driver.get('http://www.schoolinfo.go.kr')
-
-                schoolName = row[u'학교명'].strip()
-                schoolURL = 'http://' + row[u'홈페이지'].strip().replace('http://','')
 
                 print(schoolName + " " + schoolURL)
 
@@ -312,7 +318,7 @@ def getParentPaid(args):
 
             # end 학교루프
             except Exception as e:
-                f.write(schoolName + e.msg+ "\n")
+                f.write(schoolName + e.msg+ '\n')
                 logger.exception(schoolName + e.msg)
                 pass
 
