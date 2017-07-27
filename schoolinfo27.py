@@ -29,13 +29,13 @@ def getParentPaid(args):
     acctPrvtDf = None
     pathFile = '.\\'
     pathWebDriver = '.\\webdriver\\'
-    pathResult = '.\\result'
-    pathLog = '.\\log'
+    pathResult = '.\\result\\'
+    pathLog = '.\\log\\'
+
     if not os.path.exists(pathResult):
         os.makedirs(pathResult)
     if not os.path.exists(pathLog):
         os.makedirs(pathLog)
-
 
     logging.basicConfig(filename = pathLog + 'schoolinfo27.log'
                       , level = logging.DEBUG
