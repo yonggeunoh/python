@@ -4,17 +4,17 @@ Created on Thu Jul  6 13:40:56 2017
 @author: 1310615
 """
 
+import sys
+import os
+import argparse
+import pandas as pd
+import logging
 from pandas import DataFrame
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 #from selenium.common.exceptions import NoSuchElementException
 #from selenium.common.exceptions import StaleElementReferenceException
 #from selenium.common.exceptions import ElementNotVisibleException
-import sys
-import os
-import argparse
-import pandas as pd
-import logging
 
 
 def getParentPaid(args):
@@ -58,8 +58,8 @@ def getParentPaid(args):
     if args.grade == 'a':
         gList = gList
     else:
-        gList.clear()
-        gList.append(args.grade)
+        del gList
+        gList= list(args.grade)
 
     logger.info(u'웹드라이버 선택(팬텀은 화면표시 없음)')
     if args.browser == 'c':
@@ -146,7 +146,7 @@ def getParentPaid(args):
                     driver.get('http://www.schoolinfo.go.kr')
 
                     sname = row[u'학교명'].strip()
-                    url = 'http://' + row[u'홈페이지'].strip().replace('http://','')
+                    url = 'http://' + row[u'홈페이지'].strip().replace('http://','').rstrip('/')
                     city = row[u'시도'].strip()
 
                     print(sname + " " + url)
@@ -297,6 +297,6 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--browser', choices=['i', 'c', 'p'], default='c'
                       , help=u'''사용할 인터넷 브라우저 선택(p는 백그라운드실행)\ni = IE, c = Chrome, p = PhantomJS''')
     parser.add_argument('-g', '--grade', choices=['e', 'm', 'h', 'u', 'g', 's', 'o','a'], default='a'
-                      , help=u'''학교등급 선택\n  e = Elementary School\n, m = Middle School\n, h = High School\n, u = University\n, g = Graduate School\n, s = SpecialSchool\n, o = Others\n, a = All Grades''')
+                      , help=u'''학교등급 선택\n  e = 초등학교\n, m = 중학교\n, h = 고등학교\n, u = 대학교\n, g = 대학원\n, s = 특수학교\n, o = 기타학교\n, a = 전학급''')
     args, unparsed = parser.parse_known_args()
     getParentPaid(args)
