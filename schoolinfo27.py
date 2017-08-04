@@ -26,8 +26,7 @@ def getParentPaid(args):
     driver = None
     schoolDf = None
     schoolDfempty = None
-    acctPblcDf = None
-    acctPrvtDf = None
+    acctDf = None
     pathFile = '.\\'
     pathWebDriver = '.\\webdriver\\'
     pathResult = '.\\result\\'
@@ -39,7 +38,7 @@ def getParentPaid(args):
         os.makedirs(pathLog)
 
     logging.basicConfig(filename = pathLog + 'schoolinfo'+datetime.today().strftime("%Y%m%d%H%M%S") +'.log'
-                      , level = logging.DEBUG
+                      , level = logging.CRITICAL
                       , format = '%(asctime)s %(message)s'
                       , datefmt = '%Y/%m/%d %I:%M:%S %p')
     logger = logging.getLogger("crumbs")
@@ -114,29 +113,8 @@ def getParentPaid(args):
 
         logger.info(u'변수 초기화')
 
-        # 국공립학교 계정
-        acctPblcDf = DataFrame(columns=(u'학교명'
-                                      , u'학교구분'
-                                      , u'공시년월'
-                                      , u'학부모부담수입'
-                                      , u'등록금'
-                                      , u'학교운영지원비'
-                                      , u'수익자부담수입'
-                                      , u'급식비'
-                                      , u'방과후학교활동비'
-                                      , u'현장체험학습비'
-                                      , u'청소년단체활동비'
-                                      , u'졸업앨범대금'
-                                      , u'교과서대금'
-                                      , u'기숙사비'
-                                      , u'기타수익자부담수입'
-                                      , u'누리과정비'
-                                      , u'교복구입비'
-                                      , u'운동부운영비')
-                             , index = None)
-
         # 사립학교 계정
-        acctPrvtDf = DataFrame(columns=(u'학교명'
+        acctDf = DataFrame(columns=(u'학교명'
                                       , u'학교구분'
                                       , u'공시년월'
                                       , u'학부모부담수입'
@@ -161,7 +139,6 @@ def getParentPaid(args):
         # City Loop BEGIN
         for city in schoolDf[u'시도'].drop_duplicates():
             print(city + u'처리')
-            countPblc = 1
             countPrvt = 1
 
             # School Loop BEGIN
@@ -226,10 +203,12 @@ def getParentPaid(args):
 
                         logger.info(sname + u'예결산 구분 ')
                         select = Select(driver.find_element_by_id('select_trans_dt'))
+                        logger.info(sname + u'예결산 구분 select_trans_dt ')
                         select.select_by_index(index)
+                        logger.info(sname + u'예결산 구분 select_by_index')
                         openYYMM = driver.find_element_by_xpath("//select[@id='select_trans_dt']/option[@selected='']").text
 
-                        logger.info(sname + u'공시년월별 자세히 보기 Loop : ' )
+                        logger.info(sname + u'공시년월별 자세히 보기 openYYMM : ' + openYYMM)
                         existDetail = driver.find_element_by_xpath("//div[@id='btnDetail']/a")
 
                         if existDetail.is_displayed():
@@ -250,50 +229,159 @@ def getParentPaid(args):
                         else:
                             pass
 
+                        logger.info(sname + u'공시년월별 자세히 보기 tableNo : ' + openYYMM)
+                        
+                        
+                        logger.info(sname + u'공시년월별 자세히 보기 Cell 작성')
+                        
                         cell.append(sname)
                         cell.append(establish)
                         cell.append(openYYMM)
-                        if establish in (u'국립',u'공립'):
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='학부모부담수입']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='등록금']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='학교운영지원비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='수익자부담수입']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='급식비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='방과후학교활동비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='현장체험학습비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='청소년단체활동비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='졸업앨범대금']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='교과서대금']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='기숙사비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='기타수익자부담수입']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='누리과정비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='교복구입비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='운동부운영비']/../td").text)
-                        elif establish == u'사립':
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='학부모부담수입']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='등록금']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='입학금']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='수업료']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='학교운영지원비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='수익자부담수입']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='급식비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='방과후학교활동비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='현장체험학습비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='청소년단체활동비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='졸업앨범대금']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='교과서대금']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='기숙사비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='기타수익자부담수입']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='누리과정비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='교복구입비']/../td").text)
-                            cell.append(driver.find_element_by_xpath("//div[@id=exceldetail"+tableNo+"]//th[text()='운동부운영비']/../td").text)
+                        cell.append(driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='학부모부담수입']/../td").text)
+                        cell.append(driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='등록금']/../td").text)
 
-                        if establish in (u'국립',u'공립'):
-                            acctPblcDf.loc[countPblc] = cell
-                            countPblc += 1
-                        elif establish == u'사립':
-                            acctPrvtDf.loc[countPrvt] = cell
-                            countPrvt += 1
+                        # 입학금 
+                        cellAdmission= ''
+                        try:
+                            cellAdmission = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='입학금']/../td").text
+                        except Exception as e:
+                            logger.info('입학금 없음 '+ str(e))
+                            cellAdmission =''
+                        cell.append(cellAdmission)
+
+                        # 수업료 
+                        cellTuition= ''
+                        try:
+                            cellTuition = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='수업료']/../td").text
+                        except Exception as e:
+                            logger.info('수업료 없음 '+ str(e))
+                            cellTuition =''
+                        cell.append(cellTuition)
+
+                        # 학교운영지원비 
+                        cellOperation= ''
+                        try:
+                            cellOperation = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='학교운영지원비']/../td").text
+                        except Exception as e:
+                            logger.info('학교운영지원비 없음 '+ str(e))
+                            cellOperation =''
+                        cell.append(cellOperation)
+
+                        # 수익자부담수입
+                        cellBeneficiary = ''
+                        try:
+                            cellBeneficiary = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='수익자부담수입']/../td").text
+                        except Exception as e:
+                            logger.info('수익자부담수입 없음 '+ str(e))
+                            cellBeneficiary =''
+                        cell.append(cellBeneficiary)
+                        
+                        # 급식비
+                        cellMeal = ''
+                        try:
+                            cellMeal = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='급식비']/../td").text
+                        except Exception as e:
+                            logger.info('급식비 없음 '+ str(e))
+                            cellMeal =''
+                        cell.append(cellMeal)
+                        
+                        # 방과후학교활동비
+                        cellAfterSchool = ''
+                        try:
+                            cellAfterSchool = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='방과후학교활동비']/../td").text
+                        except Exception as e:
+                            logger.info('방과후학교활동비 없음 '+ str(e))
+                            cellAfterSchool =''
+                        cell.append(cellAfterSchool)
+                        
+                        # 현장체험학습비
+                        cellFieldStudy= ''
+                        try:
+                            cellFieldStudy = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='현장체험학습비']/../td").text
+                        except Exception as e:
+                            logger.info('현장체험학습비 없음 '+ str(e))
+                            cellFieldStudy =''
+                        cell.append(cellFieldStudy)
+                        
+                        # 청소년단체활동비
+                        cellGroupActivity = ''
+                        try:
+                            cellGroupActivity = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='청소년단체활동비']/../td").text
+                        except Exception as e:
+                            logger.info('청소년단체활동비 없음 '+ str(e))
+                            cellGroupActivity =''
+                        cell.append(cellGroupActivity)
+                        
+                        # 졸업앨범대금
+                        cellYearAlbum = ''
+                        try:
+                            cellYearAlbum = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='졸업앨범대금']/../td").text
+                        except Exception as e:
+                            logger.info('졸업앨범대금 없음 '+ str(e))
+                            cellYearAlbum =''
+                        cell.append(cellYearAlbum)
+                        
+                        # 교과서대금
+                        cellTextbook = ''
+                        try:
+                            cellTextbook = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='교과서대금']/../td").text
+                        except Exception as e:
+                            logger.info('교과서대금 없음 '+ str(e))
+                            cellTextbook =''
+                        cell.append(cellTextbook)
+                        
+                        # 기숙사비
+                        cellDorm = ''
+                        try:
+                            cellDorm = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='기숙사비']/../td").text
+                        except Exception as e:
+                            logger.info('기숙사비 없음 '+ str(e))
+                            cellDorm =''
+                        cell.append(cellDorm)
+                        
+                        # 기타수익자부담수입
+                        cellEtc = ''
+                        try:
+                            cellEtc = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='기타수익자부담수입']/../td").text
+                        except Exception as e:
+                            logger.info('기타수익자부담수입 없음 '+ str(e))
+                            cellEtc =''
+                        cell.append(cellEtc)
+
+                        # 누리과정비 
+                        cellNuri = ''
+                        try:
+                            cellNuri = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='누리과정비']/../td").text
+                        except Exception as e:
+                            logger.info('누리과정비 없음 '+ str(e))
+                            cellNuri =''
+                        cell.append(cellNuri)
+
+                        # 교복구입비 
+                        cellUniform = ''
+                        try:
+                            cellUniform = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='교복구입비']/../td").text
+                        except Exception as e:
+                            logger.info('교복구입비 없음 '+ str(e))
+                            cellUniform =''
+                        cell.append(cellUniform)
+                        
+                        # 운동부운영비 
+                        cellSports = ''
+                        try:
+                            cellSports = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='운동부운영비']/../td").text
+                        except Exception as e:
+                            logger.info('운동부운영비 없음 '+ str(e))
+                            cellSports =''
+                        cell.append(cellSports)
+                        
+                        logger.info(cell)
+
+
+                        acctDf.loc[countPrvt] = cell
+                        countPrvt += 1
+                    # openYYMM Loop END
+
 
                 except Exception as e:
                     logger.exception(sname + ' ' + str(e))
@@ -301,10 +389,8 @@ def getParentPaid(args):
                 # School Loop END
 
             logger.info(sname + u': 파일 저장(' + grade.get(g) +u')')
-            acctPblcDf.to_excel(pathResult + city + grade.get(g) + u'공립' + u'.xlsx',  header=True, index=True)
-            acctPrvtDf.to_excel(pathResult + city + grade.get(g) + u'사립' + u'.xlsx',  header=True, index=True)
-            acctPblcDf.drop(acctPblcDf.index, inplace=True)
-            acctPrvtDf.drop(acctPrvtDf.index, inplace=True)
+            acctDf.to_excel(pathResult + grade.get(g) + city  + u'.xlsx',  header=True, index=True)
+            acctDf.drop(acctDf.index, inplace=True)
             # City Loop END
 
         # Grade Loop END
