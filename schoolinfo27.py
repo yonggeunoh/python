@@ -115,25 +115,25 @@ def getParentPaid(args):
 
         # 사립학교 계정
         acctDf = DataFrame(columns=(u'학교명'
-                                      , u'학교구분'
-                                      , u'공시년월'
-                                      , u'학부모부담수입'
-                                      , u'등록금'
-                                      , u'입학금'
-                                      , u'수업료'
-                                      , u'학교운영지원비'
-                                      , u'수익자부담수입'
-                                      , u'급식비'
-                                      , u'방과후학교활동비'
-                                      , u'현장체험학습비'
-                                      , u'청소년단체활동비'
-                                      , u'졸업앨범대금'
-                                      , u'교과서대금'
-                                      , u'기숙사비'
-                                      , u'기타수익자부담수입'
-                                      , u'누리과정비'
-                                      , u'교복구입비'
-                                      , u'운동부운영비')
+                                  , u'학교구분'
+                                  , u'공시년월'
+                                  , u'학부모부담수입'
+                                  , u'등록금'
+                                  , u'입학금'
+                                  , u'수업료'
+                                  , u'학교운영지원비'
+                                  , u'수익자부담수입'
+                                  , u'급식비'
+                                  , u'방과후학교활동비'
+                                  , u'현장체험학습비'
+                                  , u'청소년단체활동비'
+                                  , u'졸업앨범대금'
+                                  , u'교과서대금'
+                                  , u'기숙사비'
+                                  , u'기타수익자부담수입'
+                                  , u'누리과정비'
+                                  , u'교복구입비'
+                                  , u'운동부운영비')
                              , index = None)
 
         # City Loop BEGIN
@@ -199,6 +199,13 @@ def getParentPaid(args):
                     select = Select(driver.find_element_by_id('select_trans_dt'))
 
                     logger.info(sname + u'예결산 년월 루프')
+
+                    #TODO 년월 최신것만 받는것 로직 추가 필요
+                    if args.latest == 'n':
+                        pass
+                    else:
+                        pass
+
                     for index in range(len(select.options)):
 
                         logger.info(sname + u'예결산 구분 ')
@@ -404,6 +411,8 @@ if __name__ == '__main__':
                                    , formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-b', '--browser', choices=['i', 'c', 'p'], default='c'
                       , help=u'''사용할 인터넷 브라우저 선택(p는 백그라운드실행)\ni = IE, c = Chrome, p = PhantomJS''')
+    parser.add_argument('-l', '--latest', choices=['y', 'n'], default='y'
+                      , help=u'''가장 최신 자료만 취득''')
     parser.add_argument('-g', '--grade', choices=['e', 'm', 'h', 'u', 'g', 's', 'o','a'], default='a'
                       , help=u'''학교등급 선택\n  e = 초등학교\n, m = 중학교\n, h = 고등학교\n, u = 대학교\n, g = 대학원\n, s = 특수학교\n, o = 기타학교\n, a = 전학급''')
     args, unparsed = parser.parse_known_args()
