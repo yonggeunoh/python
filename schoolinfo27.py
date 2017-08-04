@@ -163,9 +163,8 @@ def getParentPaid(args):
                         try:
                             driver.find_element_by_id("btnMore")
                         except Exception as e:
-                            logger.exception(sname + ": btnMore" + e.msg)
+                            logger.info(sname + ": btnMore Break")
                             break
-
                         driver.find_element_by_id("btnMore").click()
 
                     logger.info(sname + u'학교검색결과 색인')
