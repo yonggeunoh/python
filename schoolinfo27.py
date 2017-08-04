@@ -13,9 +13,6 @@ from pandas import DataFrame
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
-#from selenium.common.exceptions import NoSuchElementException
-#from selenium.common.exceptions import StaleElementReferenceException
-#from selenium.common.exceptions import ElementNotVisibleException
 
 
 def getParentPaid(args):
