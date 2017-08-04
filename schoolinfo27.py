@@ -110,7 +110,7 @@ def getParentPaid(args):
 
         logger.info(u'변수 초기화')
 
-        # 사립학교 계정
+        # 계정
         acctDf = DataFrame(columns=(u'학교명'
                                   , u'학교구분'
                                   , u'공시년월'
@@ -248,7 +248,7 @@ def getParentPaid(args):
                         try:
                             cellAdmission = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='입학금']/../td").text
                         except Exception as e:
-                            logger.info('입학금 없음 '+ str(e))
+                            logger.info('입학금 없음')
                             cellAdmission =''
                         cell.append(cellAdmission)
 
@@ -257,7 +257,7 @@ def getParentPaid(args):
                         try:
                             cellTuition = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='수업료']/../td").text
                         except Exception as e:
-                            logger.info('수업료 없음 '+ str(e))
+                            logger.info('수업료 없음')
                             cellTuition =''
                         cell.append(cellTuition)
 
@@ -266,7 +266,7 @@ def getParentPaid(args):
                         try:
                             cellOperation = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='학교운영지원비']/../td").text
                         except Exception as e:
-                            logger.info('학교운영지원비 없음 '+ str(e))
+                            logger.info('학교운영지원비 없음')
                             cellOperation =''
                         cell.append(cellOperation)
 
@@ -275,7 +275,7 @@ def getParentPaid(args):
                         try:
                             cellBeneficiary = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='수익자부담수입']/../td").text
                         except Exception as e:
-                            logger.info('수익자부담수입 없음 '+ str(e))
+                            logger.info('수익자부담수입 없음')
                             cellBeneficiary =''
                         cell.append(cellBeneficiary)
                         
@@ -284,7 +284,7 @@ def getParentPaid(args):
                         try:
                             cellMeal = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='급식비']/../td").text
                         except Exception as e:
-                            logger.info('급식비 없음 '+ str(e))
+                            logger.info('급식비 없음')
                             cellMeal =''
                         cell.append(cellMeal)
                         
@@ -293,7 +293,7 @@ def getParentPaid(args):
                         try:
                             cellAfterSchool = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='방과후학교활동비']/../td").text
                         except Exception as e:
-                            logger.info('방과후학교활동비 없음 '+ str(e))
+                            logger.info('방과후학교활동비 없음')
                             cellAfterSchool =''
                         cell.append(cellAfterSchool)
                         
@@ -302,7 +302,7 @@ def getParentPaid(args):
                         try:
                             cellFieldStudy = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='현장체험학습비']/../td").text
                         except Exception as e:
-                            logger.info('현장체험학습비 없음 '+ str(e))
+                            logger.info('현장체험학습비 없음')
                             cellFieldStudy =''
                         cell.append(cellFieldStudy)
                         
@@ -311,7 +311,7 @@ def getParentPaid(args):
                         try:
                             cellGroupActivity = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='청소년단체활동비']/../td").text
                         except Exception as e:
-                            logger.info('청소년단체활동비 없음 '+ str(e))
+                            logger.info('청소년단체활동비 없음')
                             cellGroupActivity =''
                         cell.append(cellGroupActivity)
                         
@@ -320,7 +320,7 @@ def getParentPaid(args):
                         try:
                             cellYearAlbum = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='졸업앨범대금']/../td").text
                         except Exception as e:
-                            logger.info('졸업앨범대금 없음 '+ str(e))
+                            logger.info('졸업앨범대금 없음')
                             cellYearAlbum =''
                         cell.append(cellYearAlbum)
                         
@@ -329,7 +329,7 @@ def getParentPaid(args):
                         try:
                             cellTextbook = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='교과서대금']/../td").text
                         except Exception as e:
-                            logger.info('교과서대금 없음 '+ str(e))
+                            logger.info('교과서대금 없음')
                             cellTextbook =''
                         cell.append(cellTextbook)
                         
@@ -338,7 +338,7 @@ def getParentPaid(args):
                         try:
                             cellDorm = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='기숙사비']/../td").text
                         except Exception as e:
-                            logger.info('기숙사비 없음 '+ str(e))
+                            logger.info('기숙사비 없음')
                             cellDorm =''
                         cell.append(cellDorm)
                         
@@ -347,7 +347,7 @@ def getParentPaid(args):
                         try:
                             cellEtc = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='기타수익자부담수입']/../td").text
                         except Exception as e:
-                            logger.info('기타수익자부담수입 없음 '+ str(e))
+                            logger.info('기타수익자부담수입 없음')
                             cellEtc =''
                         cell.append(cellEtc)
 
@@ -356,7 +356,7 @@ def getParentPaid(args):
                         try:
                             cellNuri = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='누리과정비']/../td").text
                         except Exception as e:
-                            logger.info('누리과정비 없음 '+ str(e))
+                            logger.info('누리과정비 없음')
                             cellNuri =''
                         cell.append(cellNuri)
 
@@ -365,7 +365,7 @@ def getParentPaid(args):
                         try:
                             cellUniform = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='교복구입비']/../td").text
                         except Exception as e:
-                            logger.info('교복구입비 없음 '+ str(e))
+                            logger.info('교복구입비 없음')
                             cellUniform =''
                         cell.append(cellUniform)
                         
@@ -374,13 +374,10 @@ def getParentPaid(args):
                         try:
                             cellSports = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='운동부운영비']/../td").text
                         except Exception as e:
-                            logger.info('운동부운영비 없음 '+ str(e))
+                            logger.info('운동부운영비 없음')
                             cellSports =''
                         cell.append(cellSports)
                         
-                        logger.info(cell)
-
-
                         acctDf.loc[countPrvt] = cell
                         countPrvt += 1
                     # openYYMM Loop END
