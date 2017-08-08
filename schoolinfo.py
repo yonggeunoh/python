@@ -143,6 +143,8 @@ def getParentPaid(args):
             # School Loop BEGIN
             for idx, row in schoolDf.loc[(schoolDf[u'시도'] == city)].iterrows():
 
+                logurl = ''
+                
                 try:
                     logger.info(u'웹 호출')
                     driver.implicitly_wait(3)
@@ -152,7 +154,8 @@ def getParentPaid(args):
                     url = 'http://' + row[u'홈페이지'].strip().replace('http://','').rstrip('/')
                     city = row[u'시도'].strip()
 
-                    print(sname + " " + url)
+                    logurl = sname + " " + url
+                    print(logurl)
 
                     logger.info(sname + ': Loop Start')
 
@@ -196,21 +199,22 @@ def getParentPaid(args):
                     logger.info(sname + u'공시년월 목록 선택')
                     select = Select(driver.find_element_by_id('select_trans_dt'))
 
-                    logger.info(sname + u'예결산 년월 루프')
-
-                    #TODO 년월 최신것만 받는것 로직 추가 필요
-                    if args.latest == 'n':
-                        pass
+                    # latest = y 가장 최신 예결산 자료만 입수
+                    if args.latest == 'y':
+                        optionSize = 1
                     else:
-                        pass
+                        optionSize = len(select.options)
 
-                    for index in range(len(select.options)):
+                    logger.info(sname + u'공시년월 최근것 만 입수 ' + args.latest )
+                    for index in range(optionSize):
 
-                        logger.info(sname + u'예결산 구분 ')
+                        logger.info(sname + u'공시년월 select_trans_dt')
                         select = Select(driver.find_element_by_id('select_trans_dt'))
-                        logger.info(sname + u'예결산 구분 select_trans_dt ')
+                        
+                        logger.info(sname + u'공시년월 select_trans_dt option')
                         select.select_by_index(index)
-                        logger.info(sname + u'예결산 구분 select_by_index')
+                        
+                        logger.info(sname + u'공시년월 select_by_index')
                         openYYMM = driver.find_element_by_xpath("//select[@id='select_trans_dt']/option[@selected='']").text
 
                         logger.info(sname + u'공시년월별 자세히 보기 openYYMM : ' + openYYMM)
@@ -218,12 +222,12 @@ def getParentPaid(args):
 
                         if existDetail.is_displayed():
                             existDetail.click()
-                        
+
                         cell = []
                         print(sname + " " + openYYMM)
 
                         openMM = openYYMM[6:]
-                        
+
                         tableNo = ''
                         if openMM == '05월':
                             # 5월은 세입예산에서 추출
@@ -250,17 +254,22 @@ def getParentPaid(args):
                                 except NoSuchElementException as e:
                                     pass
                                 cell.append(cellString)
-#                                cellString = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='" + col + "']/../td").text
-#                                if len(cellString) > 0:
-#                                    cell.append(cellString)
-#                                else:
-#                                    cell.append('')
-                        
+                                '''
+                                # Y.Oh : Exception handling can cause slowing down program.
+                                cellString = driver.find_element_by_xpath("//div[@id='exceldetail"+tableNo+"']//th[text()='" + col + "']/../td").text
+                                if len(cellString) > 0:
+                                    cell.append(cellString)
+                                else:
+                                    cell.append('')
+                                '''
                         acctDf.loc[countPrvt] = cell
                         countPrvt += 1
                     # openYYMM Loop END
 
-
+                except NoSuchElementException as e:
+                    print(logurl + u' 없음')
+                    logger.exception(u'NoSuchElementException : ' + logurl)
+                    pass
                 except Exception as e:
                     logger.exception(sname + ' ' + str(e))
                     pass
@@ -282,7 +291,7 @@ if __name__ == '__main__':
                                    , formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-b', '--browser', choices=['i', 'c', 'p'], default='c'
                       , help=u'''사용할 인터넷 브라우저 선택(p는 백그라운드실행)\ni = IE, c = Chrome, p = PhantomJS''')
-    parser.add_argument('-l', '--latest', choices=['y', 'n'], default='y'
+    parser.add_argument('-l', '--latest', choices=['y', 'n'], default='n'
                       , help=u'''가장 최신 자료만 취득''')
     parser.add_argument('-g', '--grade', choices=['e', 'm', 'h', 'u', 'g', 's', 'o','a'], default='a'
                       , help=u'''학교등급 선택\n  e = 초등학교\n, m = 중학교\n, h = 고등학교\n, u = 대학교\n, g = 대학원\n, s = 특수학교\n, o = 기타학교\n, a = 전학급''')
