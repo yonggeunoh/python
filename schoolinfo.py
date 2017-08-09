@@ -173,7 +173,10 @@ def getParentPaid(args):
                         driver.find_element_by_id("btnMore").click()
 
                     logger.info(sname + u'학교검색결과 색인')
-                    driver.find_element_by_xpath("//a[@href='"+url+"']/parent::span/parent::li/parent::ul/parent::article/h1[@class='School_Name']/a").click()
+                    if 'url' == 'urlX' :
+                        driver.find_element_by_xpath("//a[@href='"+url+"']/parent::span/parent::li/parent::ul/parent::article/h1[@class='School_Name']/a").click()
+                    else:
+                        driver.find_element_by_xpath("//p[@class='School_Division']/span[1][text()='"+city+"']/parent::p/../h1/a").click()
 
                     logger.info(sname + u'국공사립 구분확인')
                     establish = driver.find_element_by_xpath("//ul[@class='School_Data']/li[2]").text[5:]
