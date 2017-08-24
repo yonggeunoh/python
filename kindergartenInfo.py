@@ -167,6 +167,6 @@ for city in kindeListDf[u'cityname'].drop_duplicates():
             logger.error( kname + ' ' + kaddr + u" 정보취득 실패 !! " + str(e))
             pass
 
-kinderDf.to_excel(pathResult + u'kindergartenResult'+datetime.today().strftime("%Y%m%d%H%M%S")+'.xlsx',  header=True, index=True)
+    kinderDf.to_excel(pathResult + u'kindergartenResult' + city +datetime.today().strftime("%Y%m%d%H%M%S")+'.xlsx',  header=True, index=True)
 driver.close()
 driver.quit()
