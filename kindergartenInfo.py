@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Aug 21 08:52:21 2017
-
 @author: 1310615
 """
 
@@ -11,10 +10,21 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import Select
 from datetime import datetime
+import logging
 
 pathList = u'.\\'
 pathWebDriver = u'.\\'
 pathResult= u'.\\'
+
+logging.basicConfig(filename = u'.\\kindergartenLog'+datetime.today().strftime("%Y%m%d%H%M%S") +'.log'
+                  , level = logging.WARN
+                  , format = '%(asctime)s %(message)s'
+                  , datefmt = '%Y/%m/%d %I:%M:%S %p')
+logger = logging.getLogger("crumbs")
+logger.setLevel(logging.ERROR)
+
+
+
 kindeListDf = pd.read_excel(pathList  + u"kindergartenList.xlsx")
 kinderDf = df(columns=(
         # 유치원 정보
@@ -45,29 +55,34 @@ kinderDf = df(columns=(
 driver = webdriver.Chrome(pathWebDriver + 'chromedriver.exe')
 driver.implicitly_wait(5)
 
-for idx, row in kindeListDf.loc[21:25].iterrows():
+for idx, row in kindeListDf.loc[26:30].iterrows():
+#for idx, row in kindeListDf.iterrows():
     kname = row[u'kindername'].strip()
     kaddr = row[u'addr'].strip()
     kcity = row[u'cityname'].strip()
 
-    print kname + ' ' + kaddr
+    logger.info(  kname + ' ' + kaddr + ' 처리 ')
 
-    driver.get('http://e-childschoolinfo.moe.go.kr/kinderMt/combineFind.do')
-    driver.find_element_by_xpath("//select[@id='combineSidoList']/option[text()='"+kcity+u"']").click()
-    driver.find_element_by_id('organName').send_keys('')
-    driver.find_element_by_id('organName').send_keys(kname)
-    driver.find_element_by_xpath("//form[@id='combineSearch']//a[text()='검색']").click()
-    driver.find_element_by_xpath("//td[text()='"+kaddr +"']/../td/a").click()
-    driver.find_element_by_xpath("//a[text()='교육·보육비용']").click()
+    try:
 
-    select = Select(driver.find_element_by_id('select-time'))
-    optionSize = len(select.options)
-    for index in range(optionSize):
+        driver.get('http://e-childschoolinfo.moe.go.kr/kinderMt/combineFind.do')
+        driver.find_element_by_xpath("//select[@id='combineSidoList']/option[text()='"+kcity+u"']").click()
+        driver.find_element_by_id('organName').send_keys('')
+        driver.find_element_by_id('organName').send_keys(kname)
+        driver.find_element_by_xpath("//form[@id='combineSearch']//a[text()='검색']").click()
+        driver.find_element_by_xpath("//td[text()='"+kaddr +"']/../td/a").click()
+        driver.find_element_by_xpath("//a[text()='교육·보육비용']").click()
+    
         select = Select(driver.find_element_by_id('select-time'))
-        select.select_by_index(index)
-        openYYMM = driver.find_element_by_xpath("//select[@id='select-time']/option[@selected='selected']").text
+        optionSize = len(select.options)
+        for index in range(optionSize):
+            select = Select(driver.find_element_by_id('select-time'))
+            select.select_by_index(index)
+            openYYMM = driver.find_element_by_xpath("//select[@id='select-time']/option[@selected='selected']").text
 
-        try:
+            logger.info(  kname + ' ' + openYYMM + ' 처리')
+            print kname + ' ' + openYYMM + ' 처리'
+
 
             cell = []
     
@@ -112,8 +127,6 @@ for idx, row in kindeListDf.loc[21:25].iterrows():
                     cell.append(col)
                     cell.append(col)
     
-    
-    
             # 방과후 과정 교육비용 기본경비
     
             afterschool_basic = [u'수업료',u'간식비',u'급식비',u'교재비 및 재료비']
@@ -148,9 +161,9 @@ for idx, row in kindeListDf.loc[21:25].iterrows():
             # Raw 저장
             kinderDf.loc[len(kinderDf)] = cell
     
-        except NoSuchElementException as e:
-            print kname + u" 주소없음!! "
-            pass
+    except Exception as e:
+        logger.error( kname + ' ' + kaddr + u" 정보취득 실패 !! " + str(e))
+        pass
 
 kinderDf.to_excel(pathResult + u'kindergartenResult'+datetime.today().strftime("%Y%m%d%H%M%S")+'.xlsx',  header=True, index=True)
 driver.close()
