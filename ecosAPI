@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+
+"""
+Created on Fri Dec  1 13:48:23 2017
+
+@author: 1310615
+"""
+
+import requests 
+#import json
+
+
+
+host='http://ecos.bok.or.kr/api/KeyStatisticList/'
+key ='DVBBAJT79LQ4BPHL7LZ1'
+condition ='/json/kr/1/1000/'
+URL = host+ key + condition
+
+
+data= requests.get(URL).json()
+
+deli = '|'
+buff = ''
+for i in data['KeyStatisticList']['row']:
+    buff = buff + '\n' + i['CLASS_NAME']  +deli  + i['KEYSTAT_NAME'] +deli  + str(i['DATA_VALUE'])  +deli  + i['CYCLE'] +deli  + i['UNIT_NAME']  
