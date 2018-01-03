@@ -15,17 +15,25 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "D:\\app\\python\\transcribe\\API
 
 client = speech.SpeechClient()
 
-audio    = types.RecognitionAudio(uri='gs://yonggeunoh/testa20171205090904.flac')
-config   = types.RecognitionConfig(encoding=enums.RecognitionConfig.AudioEncoding.FLAC
-                                 , sample_rate_hertz=44100
-                                 , language_code='en-US')
-operation  = client.long_running_recognize(config, audio)
 
-print('Waiting for operation to complete...')
+#flacArr = ['test20171205090904','test20171205092107','test20171205104654','test20171205105137','test20171206135253']
+flacArr = ['test20171205090904']
 
-response = operation.result(timeout=90)
-# Each result is for a consecutive portion of the audio. Iterate through
-# them to get the transcripts for the entire audio file.
-for result in response.results:
-    # The first alternative is the most likely one for this portion.
-    print('{}'.format(result.alternatives[0].transcript))
+for fa in flacArr:
+    audio    = types.RecognitionAudio(uri='gs://yonggeunoh/' + fa + '.flac')
+    config   = types.RecognitionConfig(encoding=enums.RecognitionConfig.AudioEncoding.FLAC
+                                     , sample_rate_hertz=44100
+                                     , language_code='en-US')
+    operation  = client.long_running_recognize(config, audio)
+    
+    print('Waiting for operation to complete...')
+    
+    response = operation.result(timeout=180)
+    # Each result is for a consecutive portion of the audio. Iterate through
+    # them to get the transcripts for the entire audio file.
+    f = open(fa + '.txt', 'w')
+    for result in response.results:
+        # The first alternative is the most likely one for this portion.
+        f.writelines(format(result.alternatives[0].transcript))
+    f.close()
+    
